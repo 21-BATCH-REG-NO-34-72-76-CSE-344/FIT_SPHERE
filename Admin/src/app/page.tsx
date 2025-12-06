@@ -47,3 +47,55 @@ const page = () => {
       [e.target.name]: e.target.value
     })
   }
+ const addExerciseToWorkout = () => { 
+    if (exercise.name == '' || exercise.description == '' || exercise.sets == 0 || exercise.imageFile == null) {
+      toast.error('Please fill all the fields', {
+        position: 'top-center', 
+      })
+      return
+    }
+    
+  
+    setWorkout({
+      ...workout,
+      exercises: [...workout.exercises, exercise]
+    });
+    
+
+    setExercise({
+      name: '',
+      description: '',
+      sets: 0,
+      reps: 0,
+      imageURL: '',
+      imageFile: null
+    });
+  }
+
+  const deleteExerciseFromWorkout = (index: number) => { 
+    setWorkout({
+      ...workout,
+      exercises: workout.exercises.filter((exercise, i) => i !== index) 
+    })
+  }
+
+  const uploadImage = async (image: File): Promise<string | null> => { 
+    const formData = new FormData(); 
+    formData.append('myimage', image);
+    
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/image-upload/uploadimage`, { 
+        method: 'POST',
+        body: formData
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        return data.imageURL; 
+      }
+      return null;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      return null;
+    }
+  }
