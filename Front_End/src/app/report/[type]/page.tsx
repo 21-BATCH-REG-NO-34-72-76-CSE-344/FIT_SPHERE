@@ -492,3 +492,58 @@ const ReportPage = () => {
         localStorage.setItem('fitSphereData', JSON.stringify(updated));
         return updated;
       });
+  setInputDesc("");
+      setGramInput("");
+      setFoodSuggestions([]);
+    } else {
+      // For other tabs (water, steps, weight, etc.)
+      if (!inputValue) return;
+      const val = parseFloat(inputValue);
+      const desc = inputDesc || config.label;
+
+      const newEntry: Entry = {
+        id: Math.random().toString(36).substr(2, 9),
+        item: desc,
+        date: new Date().toISOString(),
+        value: val
+      };
+
+      setAllData(prev => {
+        const updated = {
+          ...prev,
+          [activeTab]: [...prev[activeTab], newEntry]
+        };
+        localStorage.setItem('fitSphereData', JSON.stringify(updated));
+        return updated;
+      });
+
+      setInputValue("");
+      setInputDesc("");
+      setFoodSuggestions([]);
+    }
+  };
+
+  // --- FOOD SEARCH SUGGESTIONS (for Calories tab) ---
+  const handleFoodSearch = (query: string) => {
+    setInputDesc(query);
+    if (query.length > 0 && activeTab === 'calories') {
+      const suggestions = Object.keys(FOOD_DATABASE)
+        .filter(food => food.toLowerCase().includes(query.toLowerCase()))
+        .slice(0, 5);
+      setFoodSuggestions(suggestions);
+      setShowSuggestions(suggestions.length > 0);
+    } else {
+      setFoodSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // --- SELECT SUGGESTION ---
+  const selectSuggestion = (food: string) => {
+    const calories = FOOD_DATABASE[food] || 0;
+    setInputDesc(food.replace(//g, ' ').charAt(0).toUpperCase() + food.slice(1).replace(//g, ' '));
+    setInputValue(calories.toString());
+    setGramInput("");
+    setFoodSuggestions([]);
+    setShowSuggestions(false);
+  };
