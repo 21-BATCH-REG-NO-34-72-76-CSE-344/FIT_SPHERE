@@ -136,3 +136,116 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
     </div>
   );
 };
+// --- FOOD DATABASE (100+ foods with calorie info per 100g) ---
+const FOOD_DATABASE: Record<string, number> = {
+  // Proteins
+  chicken: 165, beef: 250, pork: 242, fish: 100, salmon: 208, tuna: 144,
+  turkey: 135, lamb: 294, duck: 337, shrimp: 99, crab: 102, lobster: 89,
+  eggs: 155, tofu: 76, paneer: 265, tempeh: 195, seitan: 370,
+  
+  // Grains & Cereals
+  rice: 130, wheat: 340, oats: 389, quinoa: 368, barley: 354, corn: 365,
+  pasta: 370, bread: 265, rye: 338, millet: 378, buckwheat: 343,
+  
+  // Vegetables
+  broccoli: 34, spinach: 23, carrot: 41, tomato: 18, potato: 77,
+  onion: 40, garlic: 149, lettuce: 15, cucumber: 15, bell_pepper: 31,
+  cabbage: 25, cauliflower: 25, peas: 81, beans: 127, chickpeas: 164,
+  lentils: 116, asparagus: 20, beets: 43, mushroom: 22, zucchini: 17,
+  
+  // Fruits
+  banana: 89, apple: 52, orange: 47, grape: 67, strawberry: 32,
+  blueberry: 57, watermelon: 30, mango: 60, pineapple: 50, kiwi: 61,
+  papaya: 43, peach: 39, pear: 57, avocado: 160, coconut: 354,
+  lemon: 29, lime: 30,
+  
+  // Dairy
+  milk: 61, yogurt: 59, cheese: 402, butter: 717, cream: 340,
+  
+  // Nuts & Seeds
+  almond: 579, walnut: 654, peanut: 567, cashew: 553, pistachio: 556,
+  sunflower_seed: 584, flaxseed: 534, chia_seed: 486,
+  
+  // Oils & Fats
+  olive_oil: 884, coconut_oil: 892,
+  
+  // Processed Foods
+  pizza: 285, burger: 215, fries: 365, chips: 541, chocolate: 535,
+  soda: 42, beer: 43, wine: 85, juice: 45,
+
+  // --- SUBCONTINENTAL FOODS (Indian, Pakistani, Bangladeshi) ---
+  // Indian Breads
+  roti: 165, naan: 262, paratha: 234, chapati: 165, puri: 300,
+  dosa: 168, idli: 150, uttapam: 172,
+  
+  // Indian Rice Dishes
+  biryani: 206, pulao: 178, khichdi: 145,
+  
+  // Indian Curries & Gravies
+  butter_chicken: 197, tikka_masala: 168, curry_paste: 45,
+  
+  // Indian Vegetables & Sides
+  samosa: 262, pakora: 285, aloo_gobi: 98, dal_makhani: 116,
+  rajma: 91, chana_masala: 121, palak_paneer: 108,
+  
+  // Indian Breads & Snacks
+  bhatura: 276, poha: 76, upma: 140, chole_bhature: 285,
+  
+  // Indian Condiments & Sauces
+  ghee: 884, coconut_milk: 230, tamarind: 239,
+  
+  // Indian Spices & Flavoring
+  turmeric: 312, cumin: 375, coriander: 298, ginger: 80,
+  chili_powder: 318, cardamom: 311,
+  
+  // Indian Desserts
+  gulab_jamun: 183, kheer: 139, barfi: 369, jalebi: 296,
+  rasgulla: 106, laddu: 387, halwa: 350,
+  
+  // Pakistani Foods
+  seekh_kebab: 177, nihari: 145, karahi: 198, shami_kebab: 234,
+  
+  // Bangladeshi Foods
+  shorshe_ilish: 235, hilsa_fish: 215, pantabhat: 142,
+  biriyani: 206, khichuri: 145, tehari: 182,
+  luchi: 280, puri_bd: 300, paratha_bd: 234,
+  samosa_bd: 262, spring_roll: 245, fuchka: 180,
+  bhelpuri_bd: 156, chotpoti: 98, jhal_muri: 165,
+  dal_bhaat: 156, fish_curry_bd: 145, chicken_curry_bd: 165,
+  mutton_curry: 198, beef_curry: 210, prawn_curry: 155,
+  lau_curry: 65, pumpkin_curry: 72, bitter_gourd_curry: 35,
+  okra_fry: 145, eggplant_curry: 85, potato_curry: 120,
+  spinach_curry: 45, mixed_vegetable: 95, cabbage_fry: 65,
+  khichdi_bd: 145, pulao_bd: 178, fried_rice_bd: 190,
+  egg_roll: 215, meat_roll: 245, vegetable_roll: 180,
+  shutki_curry: 125, mola_fish: 88, boal_fish: 105,
+  rui_fish: 112, katla_fish: 118, pabda_fish: 108,
+  mishti_doi: 165, payesh: 168, khiroharam: 145,
+  jalebi_bd: 296, sandesh: 287, rasgolla_bd: 106,
+  chandrapuli: 245, kalojam: 256, roshogolla: 106,
+  bhorta: 85, bhuna_khichdi: 145, shutki_macher_jhol: 125,
+  fuska_pani: 12, golgappa_bd: 150, pani_puri_bd: 145,
+  haleem: 265, korma: 235, dopiaza: 175,
+  achar: 85, pickle_bd: 95, lime_pickle: 75,
+  
+  // Bangladesh Street Food
+  falooda_bd: 245, baraf_ka_gola: 95, mango_sorbet: 110,
+  shaved_ice_bd: 12, falsa_juice: 45, sugarcane_juice: 55,
+  
+  // Sri Lankan Foods
+  kottu_roti: 245, hoppers: 138, lamprais: 210,
+  
+  // South Indian Specialties
+  idiyappam: 168, vada: 246, medu_vada: 260,
+  appam: 145, puttu: 165,
+  
+  // North Indian Meat Dishes
+  tandoori_chicken: 195, tikka_kebab: 180,
+  
+  // Legumes & Lentils
+  moong_dal: 347, urad_dal: 341, masoor_dal: 353, toor_dal: 349,
+  
+  // Additional Subcontinental Items
+  makhana: 106, sago: 335, vermicelli: 382,
+  milk_powder: 496, panipuri_pani: 12, chaat_powder: 340,
+};
