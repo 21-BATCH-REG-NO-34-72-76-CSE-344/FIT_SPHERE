@@ -64,3 +64,79 @@ const AddWorkoutPage: React.FC = () => {
       return null;
     }
   };
+ const addExerciseToWorkout = () => {
+    if (!exercise.name || !exercise.description || !exercise.imageFile || exercise.sets <= 0 || exercise.reps <= 0) {
+      toast.error("Fill all exercise fields");
+      return;
+    }
+    setWorkout({ ...workout, exercises: [...workout.exercises, exercise] });
+    setExercise({ name: "", description: "", sets: 0, reps: 0, imageURL: "", imageFile: null });
+  };
+
+  const deleteExerciseFromWorkout = (index: number) => {
+    setWorkout({ ...workout, exercises: workout.exercises.filter((_, i) => i !== index) });
+  };
+
+  const saveWorkout = async () => {
+    if (!isLoggedIn || !workout.name || !workout.description || !workout.durationInMinutes || !workout.imageFile) {
+      toast.error("Complete workout fields first");
+      return;
+    }
+    if (workout.exercises.length === 0) {
+      toast.error("Add at least one exercise");
+      return;
+    }
+
+    const imageURL = await uploadImage(workout.imageFile);
+    const exercises = await Promise.all(
+      workout.exercises.map(async (ex) => ({
+        ...ex,
+        imageURL: ex.imageFile ? (await uploadImage(ex.imageFile)) || "" : "",
+      }))
+    );
+
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/workoutplans/workouts`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ ...workout, imageURL, exercises }),
+    });
+
+    if (response.ok) {
+      toast.success("Workout saved!");
+      setWorkout({ name: "", description: "", durationInMinutes: 0, exercises: [], imageURL: "", imageFile: null });
+    } else {
+      toast.error("Failed to save workout");
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6">Add Workout</h1>
+      <WorkoutForm
+        workout={workout}
+        onChange={handleWorkoutChange}
+        onImageChange={(file) => setWorkout({ ...workout, imageFile: file })}
+      />
+
+      <hr className="my-8" />
+
+      <ExerciseForm
+        exercise={exercise}
+        onChange={handleExerciseChange}
+        onImageChange={(file) => setExercise({ ...exercise, imageFile: file })}
+        onAdd={addExerciseToWorkout}
+      />
+
+      <div className="my-8">
+        <ExerciseList exercises={workout.exercises} onDelete={deleteExerciseFromWorkout} />
+      </div>
+
+      <button className="btn btn-success w-full mt-6" onClick={saveWorkout}>
+        Save Workout
+      </button>
+    </div>
+  );
+};
+
+export default AddWorkoutPage;
