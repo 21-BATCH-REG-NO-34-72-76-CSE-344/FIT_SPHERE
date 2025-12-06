@@ -163,3 +163,84 @@ const page = () => {
         toast.success('Workout created successfully', {
           position: 'top-center',
         });
+   setWorkout({
+          name: '',
+          description: '',
+          durationInMinutes: 0,
+          exercises: [],
+          imageURL: '',
+          imageFile: null
+        });
+      } else {
+        toast.error('Failed to create workout');
+      }
+    } catch (error) {
+      console.error('Error saving workout:', error);
+      toast.error('Failed to create workout');
+    }
+  }
+
+  return (
+    <div className='formpage'>
+      <h1 className='title'>Add Workout</h1> 
+      
+      <input
+        type='text'
+        placeholder='Workout Name'
+        name='name'
+        value={workout.name}
+        onChange={handleWorkoutChange}
+      />
+      
+      <textarea
+        placeholder='Workout Description'
+        name='description'
+        value={workout.description}
+        onChange={(e) => {
+          setWorkout({
+            ...workout,
+            description: e.target.value
+          })
+        }}
+        rows={5}
+        cols={50}
+      />
+      
+      <label htmlFor='durationInMinutes'>Duration in Minutes</label>
+      <input 
+        type='number'
+        placeholder='Workout Duration'
+        name='durationInMinutes' 
+        value={workout.durationInMinutes}
+        onChange={handleWorkoutChange}
+      />
+
+      <input
+        type='file'
+        placeholder='Workout Image'
+        name='workoutImage'
+        onChange={(e) =>
+          setWorkout({
+            ...workout,
+            imageFile: e.target.files![0]
+          })
+        }
+      />
+
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '10px' 
+        }}
+      >
+        <h2 className='title'>Add Exercise to Workout</h2> 
+        
+        <input
+          type='text'
+          placeholder='Exercise Name'
+          name='name'
+          value={exercise.name}
+          onChange={handleExerciseChange}
+        />
