@@ -399,3 +399,96 @@ const ReportPage = () => {
         localStorage.setItem('fitSphereData', JSON.stringify(fallbackData));
       }
     };
+   fetchCalorieData();
+  }, []);
+
+  // --- GET CURRENT CONTEXT ---
+  const config = CATEGORIES[activeTab];
+  const currentHistory = allData[activeTab];
+
+  // --- CALCULATE TODAY'S TOTAL ---
+  const getTodayTotal = () => {
+    const todayStr = new Date().toDateString();
+    const todayEntries = currentHistory.filter(e => new Date(e.date).toDateString() === todayStr);
+    
+    if (config.isSum) {
+      return todayEntries.reduce((acc, curr) => acc + curr.value, 0);
+    } else {
+      return todayEntries.length > 0 ? todayEntries[todayEntries.length - 1].value : 0;
+    }
+  };
+
+  const todayTotal = getTodayTotal();
+  const currentGoal = customGoals[activeTab];
+  const remaining = Math.max(0, currentGoal - todayTotal);
+
+  // --- SAVE GOAL ---
+  const saveGoal = () => {
+    const newGoal = parseFloat(goalInput);
+    if (newGoal > 0) {
+      const updated = { ...customGoals, [activeTab]: newGoal };
+      setCustomGoals(updated);
+      localStorage.setItem('fitSphereGoals', JSON.stringify(updated));
+      setShowGoalEdit(false);
+      setGoalInput("");
+    }
+  };
+
+  // --- PROCESS DATA FOR CHART ---
+  const chartData = useMemo(() => {
+    const daysMap = new Map<string, number>();
+    const now = new Date();
+    
+    // Create last 5 days shell
+    const result = [];
+    for(let i=4; i>=0; i--) {
+        const d = new Date();
+        d.setDate(now.getDate() - i);
+        const key = d.toDateString();
+        daysMap.set(key, 0);
+        result.push({ 
+            dateKey: key, 
+            label: i===0 ? 'Today' : d.toLocaleDateString('en-US',{weekday:'short'}), 
+            value: 0 
+        });
+    }
+
+    // Fill Data
+    currentHistory.forEach(entry => {
+        const dKey = new Date(entry.date).toDateString();
+        if(daysMap.has(dKey)) {
+            if(config.isSum) {
+                // For Cal/Water/Steps -> Add them up
+                daysMap.set(dKey, (daysMap.get(dKey) || 0) + entry.value);
+            } else {
+                // For Weight -> Take the latest value
+                daysMap.set(dKey, entry.value);
+            }
+        }
+    });
+
+    return result.map(r => ({ ...r, value: daysMap.get(r.dateKey) || 0 }));
+  }, [currentHistory, config]); // Re-runs ONLY when tab or data changes
+
+  // --- ADD ENTRY FUNCTION ---
+  const handleAdd = () => {
+    if (activeTab === 'calories') {
+      if (!gramInput || !inputDesc) return;
+      const grams = parseFloat(gramInput);
+      const kcal = gramsToKcal(grams, inputDesc);
+      
+      const newEntry: Entry = {
+        id: Math.random().toString(36).substr(2, 9),
+        item: inputDesc,
+        date: new Date().toISOString(),
+        value: kcal
+      };
+
+      setAllData(prev => {
+        const updated = {
+          ...prev,
+          [activeTab]: [...prev[activeTab], newEntry]
+        };
+        localStorage.setItem('fitSphereData', JSON.stringify(updated));
+        return updated;
+      });
