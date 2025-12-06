@@ -249,3 +249,43 @@ const FOOD_DATABASE: Record<string, number> = {
   makhana: 106, sago: 335, vermicelli: 382,
   milk_powder: 496, panipuri_pani: 12, chaat_powder: 340,
 };
+// Helper function to convert grams to kcal
+const gramsToKcal = (grams: number, foodName: string): number => {
+  const cleanName = foodName.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
+  const caloriesPer100g = FOOD_DATABASE[cleanName] || 0;
+  return Math.round((grams * caloriesPer100g) / 100);
+};
+
+// --- 4. MAIN PAGE ---
+const ReportPage = () => {
+  const params = useParams();
+  const typeParam = (params?.type as string)?.toLowerCase() || 'calories';
+  const activeTab = (typeParam in CATEGORIES ? typeParam : 'calories') as CategoryKey;
+  
+  const [inputValue, setInputValue] = useState("");
+  const [inputDesc, setInputDesc] = useState("");
+  const [foodSuggestions, setFoodSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [gramInput, setGramInput] = useState("");
+  const [showGoalEdit, setShowGoalEdit] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+
+  // --- DATA STORAGE ---
+  const [allData, setAllData] = useState<Record<CategoryKey, Entry[]>>({
+    calories: [],
+    water: [],
+    steps: [],
+    sleep: [],
+    workout: [],
+    weight: []
+  });
+
+  // --- CUSTOM GOALS STORAGE ---
+  const [customGoals, setCustomGoals] = useState<Record<CategoryKey, number>>({
+    calories: 2500,
+    water: 3000,
+    steps: 10000,
+    sleep: 8,
+    workout: 60,
+    weight: 75
+  });
