@@ -63,3 +63,58 @@ const LoginPage = () => {
       setIsLoading(false);
     }
   };
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogin();
+    }
+  };
+
+  return (
+    <div className="formpage">
+      <h2>Admin Login</h2>
+      
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        onKeyPress={handleKeyPress}
+        disabled={isLoading}
+      />
+      
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        onKeyPress={handleKeyPress}
+        disabled={isLoading}
+      />
+      
+      <button 
+        onClick={handleLogin}
+        disabled={isLoading}
+        style={{
+          opacity: isLoading ? 0.6 : 1,
+          cursor: isLoading ? 'not-allowed' : 'pointer'
+        }}
+      >
+        {isLoading ? 'Logging in...' : 'Login'}
+      </button>
+      
+      <p>
+        Don't have an account?{' '}
+        <a 
+          href="/adminauth/register" 
+          style={{ color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }}
+        >
+          Sign up here
+        </a>
+      </p>
+      
+      <ToastContainer />
+    </div>
+  );
+};
+
+export default LoginPage;
