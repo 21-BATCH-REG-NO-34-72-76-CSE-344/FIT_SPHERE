@@ -99,3 +99,67 @@ const page = () => {
       return null;
     }
   }
+ const checkLogin = async () => {
+
+      if (!localStorage.getItem('isLoggedIn')==true) {
+        toast.error('Please login first');
+        return false;
+      }
+  }
+
+  const saveWorkout = async () => {
+    const isLoggedIn = await checkLogin();
+    if (!isLoggedIn) return;
+
+    if (workout.name == '' || workout.description == '' || workout.durationInMinutes == 0 || workout.imageFile == null) { 
+      toast.error('Please fill all the workout fields', {
+        position: 'top-center',
+      })
+      return
+    }
+
+    if (workout.exercises.length === 0) {
+      toast.error('Please add at least one exercise', {
+        position: 'top-center',
+      })
+      return
+    }
+
+    try {
+   
+      if (workout.imageFile) {
+        const imageURL = await uploadImage(workout.imageFile);
+        if (imageURL) {
+          setWorkout({ 
+            ...workout,
+            imageURL 
+          })
+        }
+      }
+
+
+      for (let i = 0; i < workout.exercises.length; i++) { 
+        let tempImg = workout.exercises[i].imageFile 
+        if (tempImg) {
+          let imgURL = await uploadImage(tempImg);
+          if (imgURL) {
+            workout.exercises[i].imageURL = imgURL; 
+          }
+        }
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/workoutplans/workouts`, { 
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(workout),
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Workout Created successfully', data);
+        toast.success('Workout created successfully', {
+          position: 'top-center',
+        });
