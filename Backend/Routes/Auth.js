@@ -80,3 +80,61 @@ router.post('/register', async (req, res, next) => {
         next(err);
     }
 });
+
+// ✅ Login route - ALSO REMOVE TRIM()
+router.post('/login', async (req, res, next) => {
+    try {
+        const { email, password } = req.body;
+
+        console.log("email: ", email, "password: ", password);
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(400).json(createResponse(false, 'NO user found by this email'));
+        }
+        console.log("password from database", user.password);
+
+     
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            return res.status(400).json(createResponse(false, 'Invalid credentials'));
+        }
+
+        const authToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+            expiresIn: '50m',
+        });
+        const refreshToken = jwt.sign({ userId: user._id }, process.env.JWT_REFRESH_SECRET_KEY, {
+            expiresIn: '100m',
+        });
+
+        res.cookie('authToken', authToken, {
+            httpOnly: true,
+            sameSite: 'Lax',
+        });
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'Lax',
+        });
+
+        res.status(200).json(
+            createResponse(true, 'Login successful', {
+                authToken,
+                refreshToken,
+            })
+        );
+    } catch (err) {
+        next(err);
+    }
+});
+
+
+router.post('/checklogin', authTokenHandler, (req, res) => {
+    res.json(createResponse(true, 'User authenticated successfully'));
+});
+
+router.post('/logout', (req, res) => {
+    res.clearCookie('authToken');
+    res.clearCookie('refreshToken');
+    res.json(createResponse(true, 'Logout successful'));
+});
