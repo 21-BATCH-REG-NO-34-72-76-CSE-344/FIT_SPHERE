@@ -58,3 +58,42 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
 
   const { path: linePath, lastX, points } = getPath();
   const fillPath = linePath ? ${linePath} L ${lastX} ${height-padding} L ${padding} ${height-padding} Z : "";
+   return (
+    <div className="chart-container">
+      <svg viewBox={0 0 ${width} ${height}} style={{width:'100%', overflow:'visible'}}>
+        <defs>
+          <linearGradient id={grad-${color}} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+            <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+          </linearGradient>
+        </defs>
+        
+        
+        <text x="15" y="30" fontSize="12" fill="#888" textAnchor="middle" fontWeight="bold">
+          {unit}
+        </text>
+
+        
+        <line x1={padding} y1={padding} x2={padding} y2={height-padding} stroke="#555" strokeWidth="2" />
+        
+        
+        <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#555" strokeWidth="2" />
+
+        
+        <text x={width/2} y={height-10} fontSize="12" fill="#888" textAnchor="middle" fontWeight="bold">
+          Days
+        </text>
+
+        
+        {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
+          const yVal = Math.round(maxVal * (1 - t));
+          const yPos = height - padding - (t * (height - padding * 2));
+          return (
+            <g key={y-${i}}>
+              <line x1={padding-5} y1={yPos} x2={padding} y2={yPos} stroke="#555" strokeWidth="1" />
+              <text x={padding-10} y={yPos+4} fontSize="11" fill="#aaa" textAnchor="end">
+                {yVal}
+              </text>
+            </g>
+          );
+        })}
