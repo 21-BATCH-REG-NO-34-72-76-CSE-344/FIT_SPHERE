@@ -1,4 +1,3 @@
-
 .profile-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -174,4 +173,73 @@
   background: white;
   border-radius: 12px;
   border-left: 4px solid #ff6b6b;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 20px 10px;
+  }
+
+  .profile-header h1 {
+    font-size: 2rem;
+  }
+
+  .profile-section {
+    padding: 25px;
+  }
+
+  .profile-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metrics-grid,
+  .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  .metric-value,
+  .stat-value {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 15px 5px;
+  }
+
+  .profile-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .profile-section {
+    padding: 20px;
+  }
+
+  .profile-section h2 {
+    font-size: 1.2rem;
+  }
+
+  .info-grid {
+    gap: 15px;
+  }
+
+  .info-item {
+    padding: 12px;
+  }
+
+  .metric-card,
+  .stat-card {
+    padding: 20px 15px;
+  }
+
+  .metric-value,
+  .stat-value {
+    font-size: 1.8rem;
+  }
 }
