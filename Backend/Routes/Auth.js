@@ -138,3 +138,48 @@ router.post('/logout', (req, res) => {
     res.clearCookie('refreshToken');
     res.json(createResponse(true, 'Logout successful'));
 });
+router.get('/profile', authTokenHandler, async (req, res, next) => {
+    try {
+        const userId = req.user.userId; // From the authTokenHandler middleware
+        const user = await User.findById(userId).select('-password'); // Exclude password
+        
+        if (!user) {
+            return res.status(404).json(createResponse(false, 'User not found'));
+        }
+        
+        res.status(200).json(createResponse(true, 'User profile fetched successfully', user));
+    } catch (err) {
+        next(err);
+    }
+});
+
+// ✅ Send OTP route
+router.post('/sendotp', async (req, res) => {
+    try {
+        const { email } = req.body;
+        const otp = Math.floor(100000 + Math.random() * 900000);
+
+        const mailOptions = {
+            from: 'rahatazmain@gmail.com',
+            to: email,
+            subject: 'OTP for verification',
+            text: `Your OTP is ${otp}`,
+        };
+
+        transporter.sendMail(mailOptions, async (err, info) => {
+            if (err) {
+                console.log(err);
+                res.status(500).json(createResponse(false, err.message));
+            } else {
+                res.json(createResponse(true, 'OTP sent successfully', { otp }));
+            }
+        });
+    } catch (err) {
+        res.status(500).json(createResponse(false, 'Failed to send OTP'));
+    }
+});
+
+router.use(errorHandler);
+
+module.exports = router;
+
