@@ -547,3 +547,204 @@ const ReportPage = () => {
     setFoodSuggestions([]);
     setShowSuggestions(false);
   };
+ // --- GRAM TO KCAL CONVERTER ---
+  const handleGramInput = (grams: string) => {
+    setGramInput(grams);
+    if (activeTab === 'calories' && grams && inputDesc) {
+      const gramValue = parseFloat(grams);
+      const kcal = gramsToKcal(gramValue, inputDesc);
+      setInputValue(kcal.toString());
+    }
+  };
+
+  // --- DELETE ENTRY ---
+  const deleteEntry = (id: string) => {
+    setAllData(prev => {
+      const updated = {
+        ...prev,
+        [activeTab]: prev[activeTab].filter(entry => entry.id !== id)
+      };
+      localStorage.setItem('fitSphereData', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // --- CLEAR ALL DATA ---
+  const clearAllData = () => {
+    if (confirm(Are you sure you want to delete all ${config.label} entries?)) {
+      setAllData(prev => {
+        const updated = {
+          ...prev,
+          [activeTab]: []
+        };
+        localStorage.setItem('fitSphereData', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  }; // --- GRAM TO KCAL CONVERTER ---
+  const handleGramInput = (grams: string) => {
+    setGramInput(grams);
+    if (activeTab === 'calories' && grams && inputDesc) {
+      const gramValue = parseFloat(grams);
+      const kcal = gramsToKcal(gramValue, inputDesc);
+      setInputValue(kcal.toString());
+    }
+  };
+
+  // --- DELETE ENTRY ---
+  const deleteEntry = (id: string) => {
+    setAllData(prev => {
+      const updated = {
+        ...prev,
+        [activeTab]: prev[activeTab].filter(entry => entry.id !== id)
+      };
+      localStorage.setItem('fitSphereData', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  // --- CLEAR ALL DATA ---
+  const clearAllData = () => {
+    if (confirm(Are you sure you want to delete all ${config.label} entries?)) {
+      setAllData(prev => {
+        const updated = {
+          ...prev,
+          [activeTab]: []
+        };
+        localStorage.setItem('fitSphereData', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+ return (
+    <div className="report-container">
+      <header className="header">
+        <h1>{config.icon} <span style={{color: config.color}}>{config.label}</span></h1>
+      </header>
+
+      <div className="dashboard-grid">
+        {/* --- THE GRAPH (Single Category) --- */}
+        <div className="card chart-card">
+           <div className="card-header">
+             <h2>{config.label} Trend</h2>
+             <span style={{color: config.color}}>Goal: {config.goal} {config.unit}</span>
+           </div>
+           <SmartGraph data={chartData} color={config.color} unit={config.unit} />
+        </div>
+
+        {/* --- THE FORM & HISTORY --- */}
+        <div className="side-column">
+           <div className="card form-card">
+              <h2>Add {config.label}</h2>
+              
+              <div style={{
+                background: ${config.color}20,
+                border: 2px solid ${config.color},
+                borderRadius: '8px',
+                padding: '12px',
+                marginBottom: '15px',
+                textAlign: 'center'
+              }}>
+                <small style={{color: '#aaa'}}>Today's Progress</small>
+                <div style={{marginTop: '8px', display: 'flex', justifyContent: 'space-around'}}>
+                  <div>
+                    <div style={{fontSize: '20px', fontWeight: 'bold', color: config.color}}>
+                      {todayTotal.toFixed(config.unit === 'kg' ? 1 : 0)}
+                    </div>
+                    <small style={{color: '#888'}}>Completed</small>
+                  </div>
+                  <div style={{borderLeft: 1px solid ${config.color}40}}></div>
+                  <div>
+                    <div style={{fontSize: '20px', fontWeight: 'bold', color: config.color}}>
+                      {remaining.toFixed(config.unit === 'kg' ? 1 : 0)}
+                    </div>
+                    <small style={{color: '#888'}}>Remaining</small>
+                  </div>
+                  <div style={{borderLeft: 1px solid ${config.color}40}}></div>
+                  <div style={{position: 'relative'}}>
+                    <div 
+                      style={{
+                        fontSize: '20px', 
+                        fontWeight: 'bold', 
+                        color: config.color,
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                      onClick={() => {
+                        setShowGoalEdit(!showGoalEdit);
+                        setGoalInput(currentGoal.toString());
+                      }}
+                      title="Click to edit goal"
+                    >
+                      {currentGoal} ✏
+                    </div>
+                    <small style={{color: '#888'}}>Goal</small>
+                    
+                    {showGoalEdit && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '-40px',
+                        background: '#1E1E1E',
+                        border: 2px solid ${config.color},
+                        borderRadius: '4px',
+                        padding: '8px',
+                        marginTop: '8px',
+                        zIndex: 100,
+                        minWidth: '120px',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                      }}>
+                        <input
+                          type="number"
+                          value={goalInput}
+                          onChange={e => setGoalInput(e.target.value)}
+                          placeholder="Enter goal"
+                          style={{
+                            width: '100%',
+                            padding: '6px',
+                            marginBottom: '8px',
+                            background: '#2a2a2a',
+                            border: 1px solid ${config.color},
+                            color: config.color,
+                            borderRadius: '4px'
+                          }}
+                        />
+                        <div style={{display: 'flex', gap: '6px'}}>
+                          <button
+                            onClick={saveGoal}
+                            style={{
+                              flex: 1,
+                              padding: '6px',
+                              background: config.color,
+                              color: '#000',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer',
+                              fontWeight: 'bold'
+                            }}
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setShowGoalEdit(false)}
+                            style={{
+                              flex: 1,
+                              padding: '6px',
+                              background: '#444',
+                              color: '#aaa',
+                              border: 'none',
+                              borderRadius: '4px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
