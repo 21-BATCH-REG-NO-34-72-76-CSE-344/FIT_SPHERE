@@ -244,3 +244,88 @@ const page = () => {
           value={exercise.name}
           onChange={handleExerciseChange}
         />
+       <textarea
+          placeholder='Exercise Description'
+          name='description'
+          value={exercise.description}
+          onChange={(e) => {
+            setExercise({
+              ...exercise,
+              description: e.target.value
+            })
+          }}
+          rows={3}
+          cols={50}
+        />
+        
+        <label htmlFor="sets">Sets</label>
+        <input
+          type='number'
+          placeholder='Sets'
+          name='sets'
+          value={exercise.sets}
+          onChange={handleExerciseChange}
+        />
+        
+        <label htmlFor='reps'>Reps</label>
+        <input
+          type='number'
+          placeholder='Reps'
+          name='reps'
+          value={exercise.reps}
+          onChange={handleExerciseChange}
+        />
+        
+        <input
+          type='file'
+          placeholder='Exercise Image'
+          name='exerciseImage' 
+          onChange={(e) => {
+            setExercise({
+              ...exercise, 
+              imageFile: e.target.files![0]
+            })
+          }}
+        />
+
+        <button
+          onClick={addExerciseToWorkout}
+        >
+          Add Exercise
+        </button>
+
+        <div className='exercises'> {}
+          <h1 className='title'>Exercises</h1>
+          {
+            workout.exercises.map((exercise, index) => ( 
+              <div className='exercise' key={index}> {}
+                <h2>{exercise.name}</h2>
+                <p>{exercise.description}</p>
+                <p>Sets: {exercise.sets}</p> {}
+                <p>Reps: {exercise.reps}</p>
+                <img src={
+                  exercise.imageFile ?
+                    URL.createObjectURL(exercise.imageFile) :
+                    exercise.imageURL
+                } alt={exercise.name} />
+                <button
+                  onClick={() => deleteExerciseFromWorkout(index)} 
+                >
+                  Delete
+                </button>
+              </div>
+            ))
+          }
+        </div>
+
+        <button
+          onClick={saveWorkout} 
+        >
+          Save Workout {}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+export default page
