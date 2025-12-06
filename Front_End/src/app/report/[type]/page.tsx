@@ -97,3 +97,42 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
             </g>
           );
         })}
+ 
+        {[0, 0.5, 1].map((t, i) => (
+           <line key={i} x1={padding} y1={height-padding-(t*(height-padding*2))} x2={width-padding} y2={height-padding-(t*(height-padding*2))} stroke="#333" strokeDasharray="4" />
+        ))}
+        
+        
+        <path d={fillPath} fill={url(#grad-${color})} />
+        <path d={linePath} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
+        
+        
+        {points?.map((p, i) => (
+          <g key={i}>
+            <circle cx={p.x} cy={p.y} r="4" fill="#1E1E1E" stroke={color} strokeWidth="2" />
+            <text x={p.x} y={p.y-12} fontSize="11" fill={color} textAnchor="middle" fontWeight="bold">
+              {data[i].value}
+            </text>
+          </g>
+        ))}
+
+        
+        {data.map((d, i) => {
+          const xPos = padding + (i / (data.length - 1 || 1)) * (width - padding * 2);
+          return (
+            <text 
+              key={x-${i}} 
+              x={xPos} 
+              y={height - padding + 25} 
+              fontSize="11" 
+              fill="#aaa" 
+              textAnchor="middle"
+            >
+              {d.label}
+            </text>
+          );
+        })}
+      </svg>
+    </div>
+  );
+};
