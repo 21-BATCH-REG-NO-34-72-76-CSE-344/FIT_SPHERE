@@ -14,7 +14,7 @@ const SignupPage = () => {
 
 const handleSignup = async () => {
   try {
-    const response = await fetch(⁠ ${process.env.NEXT_PUBLIC_BACKEND_API}/admin/register ⁠, {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API}/admin/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -22,3 +22,55 @@ const handleSignup = async () => {
       body: JSON.stringify({ name, email, password }),
       credentials: 'include',
     });
+
+    const data = await response.json();
+
+    if (data.ok) {
+      console.log('Admin registration successful', data);
+      toast.success('Admin Registration Successful', {
+        position: 'top-center',
+      });
+
+      router.push('/adminauth/login')
+
+    } else {
+      console.error('Admin registration failed', response.statusText);
+      toast.error('Admin Registration Failed', {
+        position: 'top-center',
+      });
+    }
+  } catch (error) {
+    console.error('An error occurred during registration', error);
+    toast.error('Registration Error', {
+      position: 'top-center',
+    });
+  }
+};
+
+
+  return (
+    <div className="formpage">
+      <input
+        type="text"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      <button onClick={handleSignup}>Sign up</button>
+    </div>
+  )
+}
+
+export default SignupPage
