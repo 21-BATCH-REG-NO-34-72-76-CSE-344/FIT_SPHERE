@@ -4,7 +4,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useParams } from "next/navigation";
 import "./ReportPage.css";
 
-
+// --- 1. CONFIGURATION: Defines the 6 separate "Modes" ---
 type CategoryKey = 'calories' | 'water' | 'steps' | 'sleep' | 'workout' | 'weight';
 
 const CATEGORIES: Record<CategoryKey, { 
@@ -13,7 +13,7 @@ const CATEGORIES: Record<CategoryKey, {
   color: string; 
   goal: number; 
   icon: string;
-  isSum: boolean; 
+  isSum: boolean; // True = Sum (Calories), False = Last Value (Weight)
 }> = {
   calories: { label: 'Calories', unit: 'kcal', color: '#FFD700', goal: 2500, icon: '🔥', isSum: true },
   water:    { label: 'Water',    unit: 'ml',   color: '#00E0FF', goal: 3000, icon: '💧', isSum: true },
@@ -23,7 +23,7 @@ const CATEGORIES: Record<CategoryKey, {
   weight:   { label: 'Weight',   unit: 'kg',   color: '#ff4757', goal: 75,   icon: '⚖', isSum: false },
 };
 
-
+// --- 2. TYPES ---
 type Entry = {
   id: string;
   item: string; 
@@ -31,7 +31,7 @@ type Entry = {
   value: number;
 };
 
-
+// --- 3. CHART COMPONENT (Generic & Reusable) ---
 const SmartGraph = ({ data, color, unit }: { data: { label: string, value: number }[], color: string, unit: string }) => {
   const height = 300;
   const width = 700;
@@ -58,7 +58,8 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
 
   const { path: linePath, lastX, points } = getPath();
   const fillPath = linePath ? ${linePath} L ${lastX} ${height-padding} L ${padding} ${height-padding} Z : "";
-   return (
+
+  return (
     <div className="chart-container">
       <svg viewBox={0 0 ${width} ${height}} style={{width:'100%', overflow:'visible'}}>
         <defs>
@@ -68,23 +69,23 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
           </linearGradient>
         </defs>
         
-        
+        {/* Y-Axis Label */}
         <text x="15" y="30" fontSize="12" fill="#888" textAnchor="middle" fontWeight="bold">
           {unit}
         </text>
 
-        
+        {/* Y-Axis */}
         <line x1={padding} y1={padding} x2={padding} y2={height-padding} stroke="#555" strokeWidth="2" />
         
-        
+        {/* X-Axis */}
         <line x1={padding} y1={height-padding} x2={width-padding} y2={height-padding} stroke="#555" strokeWidth="2" />
 
-        
+        {/* X-Axis Label */}
         <text x={width/2} y={height-10} fontSize="12" fill="#888" textAnchor="middle" fontWeight="bold">
           Days
         </text>
 
-        
+        {/* Y-Axis Ticks and Labels */}
         {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
           const yVal = Math.round(maxVal * (1 - t));
           const yPos = height - padding - (t * (height - padding * 2));
@@ -97,16 +98,17 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
             </g>
           );
         })}
- 
+
+        {/* Grid Lines */}
         {[0, 0.5, 1].map((t, i) => (
            <line key={i} x1={padding} y1={height-padding-(t*(height-padding*2))} x2={width-padding} y2={height-padding-(t*(height-padding*2))} stroke="#333" strokeDasharray="4" />
         ))}
         
-        
+        {/* The Graph */}
         <path d={fillPath} fill={url(#grad-${color})} />
         <path d={linePath} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
         
-        
+        {/* Dots with Value Labels */}
         {points?.map((p, i) => (
           <g key={i}>
             <circle cx={p.x} cy={p.y} r="4" fill="#1E1E1E" stroke={color} strokeWidth="2" />
@@ -116,7 +118,7 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
           </g>
         ))}
 
-        
+        {/* X-Axis Labels (Days) */}
         {data.map((d, i) => {
           const xPos = padding + (i / (data.length - 1 || 1)) * (width - padding * 2);
           return (
@@ -136,6 +138,7 @@ const SmartGraph = ({ data, color, unit }: { data: { label: string, value: numbe
     </div>
   );
 };
+
 // --- FOOD DATABASE (100+ foods with calorie info per 100g) ---
 const FOOD_DATABASE: Record<string, number> = {
   // Proteins
@@ -249,6 +252,7 @@ const FOOD_DATABASE: Record<string, number> = {
   makhana: 106, sago: 335, vermicelli: 382,
   milk_powder: 496, panipuri_pani: 12, chaat_powder: 340,
 };
+
 // Helper function to convert grams to kcal
 const gramsToKcal = (grams: number, foodName: string): number => {
   const cleanName = foodName.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
@@ -289,7 +293,8 @@ const ReportPage = () => {
     workout: 60,
     weight: 75
   });
- // Fetch real calorie data from API & Database
+
+  // Fetch real calorie data from API & Database
   useEffect(() => {
     // Load custom goals from localStorage
     const savedGoals = localStorage.getItem('fitSphereGoals');
@@ -399,7 +404,8 @@ const ReportPage = () => {
         localStorage.setItem('fitSphereData', JSON.stringify(fallbackData));
       }
     };
-   fetchCalorieData();
+
+    fetchCalorieData();
   }, []);
 
   // --- GET CURRENT CONTEXT ---
@@ -492,7 +498,8 @@ const ReportPage = () => {
         localStorage.setItem('fitSphereData', JSON.stringify(updated));
         return updated;
       });
-  setInputDesc("");
+
+      setInputDesc("");
       setGramInput("");
       setFoodSuggestions([]);
     } else {
@@ -547,7 +554,8 @@ const ReportPage = () => {
     setFoodSuggestions([]);
     setShowSuggestions(false);
   };
- // --- GRAM TO KCAL CONVERTER ---
+
+  // --- GRAM TO KCAL CONVERTER ---
   const handleGramInput = (grams: string) => {
     setGramInput(grams);
     if (activeTab === 'calories' && grams && inputDesc) {
@@ -581,42 +589,9 @@ const ReportPage = () => {
         return updated;
       });
     }
-  }; // --- GRAM TO KCAL CONVERTER ---
-  const handleGramInput = (grams: string) => {
-    setGramInput(grams);
-    if (activeTab === 'calories' && grams && inputDesc) {
-      const gramValue = parseFloat(grams);
-      const kcal = gramsToKcal(gramValue, inputDesc);
-      setInputValue(kcal.toString());
-    }
   };
 
-  // --- DELETE ENTRY ---
-  const deleteEntry = (id: string) => {
-    setAllData(prev => {
-      const updated = {
-        ...prev,
-        [activeTab]: prev[activeTab].filter(entry => entry.id !== id)
-      };
-      localStorage.setItem('fitSphereData', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  // --- CLEAR ALL DATA ---
-  const clearAllData = () => {
-    if (confirm(Are you sure you want to delete all ${config.label} entries?)) {
-      setAllData(prev => {
-        const updated = {
-          ...prev,
-          [activeTab]: []
-        };
-        localStorage.setItem('fitSphereData', JSON.stringify(updated));
-        return updated;
-      });
-    }
-  };
- return (
+  return (
     <div className="report-container">
       <header className="header">
         <h1>{config.icon} <span style={{color: config.color}}>{config.label}</span></h1>
@@ -748,3 +723,165 @@ const ReportPage = () => {
                 </div>
               </div>
               
+              <div className="form-group">
+                <label>Description (Optional)</label>
+                <div style={{ position: 'relative' }}>
+                  <input 
+                      value={inputDesc} 
+                      onChange={e=>handleFoodSearch(e.target.value)}
+                      onFocus={() => inputDesc.length > 0 && setShowSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                      placeholder={activeTab === 'calories' ? 'e.g. Chicken, Rice, Paneer...' : activeTab === 'water' ? 'e.g. Glass, Bottle, Cup' : activeTab === 'sleep' ? 'e.g. Night sleep, Nap' : activeTab === 'steps' ? 'e.g. Morning walk, Evening run' : activeTab === 'workout' ? 'e.g. Gym, Yoga, Running' : 'e.g. Morning weigh-in'}
+                  />
+                  {showSuggestions && foodSuggestions.length > 0 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '100%',
+                      left: 0,
+                      right: 0,
+                      background: '#222',
+                      border: 1px solid ${config.color},
+                      borderRadius: '4px',
+                      marginTop: '5px',
+                      zIndex: 1000,
+                      boxShadow: '0 4px 6px rgba(0,0,0,0.3)'
+                    }}>
+                      {foodSuggestions.map((food, idx) => (
+                        <div
+                          key={idx}
+                          onClick={() => selectSuggestion(food)}
+                          style={{
+                            padding: '10px 12px',
+                            cursor: 'pointer',
+                            borderBottom: idx < foodSuggestions.length - 1 ? 1px solid #444 : 'none',
+                            fontSize: '14px',
+                            textTransform: 'capitalize',
+                            transition: 'background 0.2s'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = config.color + '30'}
+                          onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                        >
+                          {food.replace(/_/g, ' ')} <span style={{ color: config.color, fontSize: '12px' }}>({FOOD_DATABASE[food]} kcal)</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {activeTab === 'calories' && (
+                <div className="form-group">
+                  <label>Grams (Auto-calculates kcal)</label>
+                  <input 
+                      type="number" 
+                      value={gramInput} 
+                      onChange={e=>handleGramInput(e.target.value)} 
+                      placeholder="Enter grams (e.g., 150)"
+                  />
+                  {gramInput && inputDesc && (
+                    <small style={{color: config.color, marginTop: '5px', display: 'block'}}>
+                      {gramInput}g of {inputDesc} = {gramsToKcal(parseFloat(gramInput), inputDesc)} kcal
+                    </small>
+                  )}
+                </div>
+              )}
+
+              {activeTab !== 'calories' && (
+                <div className="form-group">
+                  <label>
+                    {activeTab === 'water' ? 'Water in ml' : 
+                     activeTab === 'sleep' ? 'Sleep in hours' : 
+                     activeTab === 'steps' ? 'Steps' : 
+                     activeTab === 'workout' ? 'Workout in minutes' : 
+                     activeTab === 'weight' ? 'Weight in kg' : 
+                     Amount (${config.unit})}
+                  </label>
+                  <input 
+                      type="number" 
+                      value={inputValue} 
+                      onChange={e=>setInputValue(e.target.value)} 
+                      placeholder={activeTab === 'water' ? 'e.g., 250 ml' : 
+                                   activeTab === 'sleep' ? 'e.g., 7 hours' : 
+                                   activeTab === 'steps' ? 'e.g., 10000' : 
+                                   activeTab === 'workout' ? 'e.g., 45 minutes' : 
+                                   activeTab === 'weight' ? 'e.g., 70 kg' : 
+                                   '0'}
+                      step={activeTab === 'weight' ? '0.1' : '1'}
+                  />
+                </div>
+              )}
+
+              <button 
+                className="add-btn" 
+                onClick={handleAdd}
+                style={{ backgroundColor: config.color, color: '#000' }}
+              >
+                SAVE {config.label.toUpperCase()}
+              </button>
+           </div>
+
+           <div className="card history-card" style={{marginTop:'20px'}}>
+              <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px'}}>
+                <h2 style={{margin: 0}}>Recent History</h2>
+                {currentHistory.length > 0 && (
+                  <button 
+                    onClick={clearAllData}
+                    style={{
+                      background: '#ff4757',
+                      border: 'none',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+              <ul className="entry-list">
+                {currentHistory.slice().reverse().map(entry => (
+                    <li key={entry.id} className="entry-item" style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                        <div>
+                          <span>{entry.item}</span>
+                          <span style={{color: '#888', fontSize: '12px', marginLeft: '8px'}}>
+                            {new Date(entry.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}
+                          </span>
+                        </div>
+                        <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                          <span style={{color: config.color, fontWeight:'bold'}}>
+                              {entry.value} {config.unit}
+                          </span>
+                          <button
+                            onClick={() => deleteEntry(entry.id)}
+                            style={{
+                              background: 'transparent',
+                              border: 'none',
+                              color: '#ff4757',
+                              cursor: 'pointer',
+                              fontSize: '16px',
+                              padding: '2px 6px'
+                            }}
+                            title="Delete entry"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                    </li>
+                ))}
+                {currentHistory.length === 0 && <li style={{color:'#666', textAlign:'center'}}>No Data</li>}
+              </ul>
+           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ReportPage;
