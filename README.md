@@ -56,23 +56,7 @@ API Layer (Express.js): RESTful API that processes requests, handles authenticat
 Data Layer (MongoDB): NoSQL database storing user profiles, health logs, and workout plans.
 
 
-Project Structure
 
-FITSPHERE/
-├── config/             # Database connection logic
-├── controllers/        # Request logic (Auth, Health logs)
-├── models/             # Mongoose schemas (User, Activity, Sleep)
-├── routes/             # API Routes
-├── middleware/         # Auth verification & Error handling
-├── client/             # React Frontend
-│   ├── src/
-│   │   ├── components/ # Reusable UI components
-│   │   ├── pages/      # Dashboard, Login, Gym Visualizer
-│   │   ├── utils/      # API helpers
-│   │   └── App.tsx     # Main entry point
-├── .gitignore
-├── package.json
-└── README.md
 
 
 Team & Course Info
