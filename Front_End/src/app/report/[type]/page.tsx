@@ -249,3 +249,153 @@ const FOOD_DATABASE: Record<string, number> = {
   makhana: 106, sago: 335, vermicelli: 382,
   milk_powder: 496, panipuri_pani: 12, chaat_powder: 340,
 };
+// Helper function to convert grams to kcal
+const gramsToKcal = (grams: number, foodName: string): number => {
+  const cleanName = foodName.toLowerCase().trim().replace(/[^a-z0-9_]/g, '_');
+  const caloriesPer100g = FOOD_DATABASE[cleanName] || 0;
+  return Math.round((grams * caloriesPer100g) / 100);
+};
+
+// --- 4. MAIN PAGE ---
+const ReportPage = () => {
+  const params = useParams();
+  const typeParam = (params?.type as string)?.toLowerCase() || 'calories';
+  const activeTab = (typeParam in CATEGORIES ? typeParam : 'calories') as CategoryKey;
+  
+  const [inputValue, setInputValue] = useState("");
+  const [inputDesc, setInputDesc] = useState("");
+  const [foodSuggestions, setFoodSuggestions] = useState<string[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [gramInput, setGramInput] = useState("");
+  const [showGoalEdit, setShowGoalEdit] = useState(false);
+  const [goalInput, setGoalInput] = useState("");
+
+  // --- DATA STORAGE ---
+  const [allData, setAllData] = useState<Record<CategoryKey, Entry[]>>({
+    calories: [],
+    water: [],
+    steps: [],
+    sleep: [],
+    workout: [],
+    weight: []
+  });
+
+  // --- CUSTOM GOALS STORAGE ---
+  const [customGoals, setCustomGoals] = useState<Record<CategoryKey, number>>({
+    calories: 2500,
+    water: 3000,
+    steps: 10000,
+    sleep: 8,
+    workout: 60,
+    weight: 75
+  });
+ // Fetch real calorie data from API & Database
+  useEffect(() => {
+    // Load custom goals from localStorage
+    const savedGoals = localStorage.getItem('fitSphereGoals');
+    if (savedGoals) {
+      try {
+        setCustomGoals(JSON.parse(savedGoals));
+      } catch (e) {
+        console.error('Error parsing saved goals:', e);
+      }
+    }
+
+    const fetchCalorieData = async () => {
+      try {
+        // First, try to load saved data from localStorage
+        const savedData = localStorage.getItem('fitSphereData');
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData);
+            setAllData(parsedData);
+            return; // Use saved data instead of fetching
+          } catch (e) {
+            console.error('Error parsing saved data:', e);
+          }
+        }
+
+        // If no saved data, fetch from API
+        const foods = ['chicken', 'wheat', 'rice', 'salmon', 'broccoli', 'banana'];
+        const calorieMap: Record<string, number> = {};
+
+        for (const food of foods) {
+          try {
+            // First try external API
+            const response = await fetch(
+              https://www.nutritionix.com/api/v2/search/instant?query=${food},
+              {
+                headers: {
+                  'x-app-id': 'b9a4bdea',
+                  'x-app-key': '7e2e3c5e8b1f4d6a9c2e1b3a5f7d9e2c'
+                }
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.common && data.common.length > 0) {
+                const item = data.common[0];
+                calorieMap[food.charAt(0).toUpperCase() + food.slice(1)] = item.nf_calories || FOOD_DATABASE[food] || 0;
+              } else {
+                // Use database if API doesn't have the food
+                calorieMap[food.charAt(0).toUpperCase() + food.slice(1)] = FOOD_DATABASE[food] || 0;
+              }
+            } else {
+              // Use database as fallback
+              calorieMap[food.charAt(0).toUpperCase() + food.slice(1)] = FOOD_DATABASE[food] || 0;
+            }
+          } catch (err) {
+            // Use database on error
+            calorieMap[food.charAt(0).toUpperCase() + food.slice(1)] = FOOD_DATABASE[food] || 0;
+          }
+        }
+
+        const today = new Date().toISOString();
+        const yesterday = new Date(Date.now() - 86400000).toISOString();
+        const twoDaysAgo = new Date(Date.now() - 172800000).toISOString();
+
+        const initialData = {
+          calories: [
+            { id: '1', item: 'Rice', value: calorieMap['Rice'] || 130, date: twoDaysAgo },
+            { id: '2', item: 'Chicken', value: calorieMap['Chicken'] || 165, date: yesterday },
+            { id: '3', item: 'Wheat', value: calorieMap['Wheat'] || 340, date: yesterday },
+            { id: '4', item: 'Salmon', value: calorieMap['Salmon'] || 208, date: today },
+            { id: '5', item: 'Broccoli', value: calorieMap['Broccoli'] || 34, date: today },
+            { id: '6', item: 'Banana', value: calorieMap['Banana'] || 89, date: today }
+          ],
+          water:    [{ id: '7', item: 'Bottle', value: 1000, date: yesterday }, { id: '8', item: 'Glass', value: 250, date: today }],
+          steps:    [{ id: '9', item: 'Walk', value: 5000, date: yesterday }, { id: '10', item: 'Run', value: 8000, date: today }],
+          sleep:    [{ id: '11', item: 'Night', value: 7, date: yesterday }],
+          workout:  [{ id: '12', item: 'Gym', value: 45, date: yesterday }],
+          weight:   [{ id: '13', item: 'Scale', value: 70, date: yesterday }, { id: '14', item: 'Scale', value: 69.5, date: today }]
+        };
+
+        setAllData(initialData);
+        localStorage.setItem('fitSphereData', JSON.stringify(initialData));
+      } catch (error) {
+        console.error('Error loading calorie data:', error);
+        const today = new Date().toISOString();
+        const yesterday = new Date(Date.now() - 86400000).toISOString();
+        const twoDaysAgo = new Date(Date.now() - 172800000).toISOString();
+        
+        const fallbackData = {
+          calories: [
+            { id: '1', item: 'Rice', value: FOOD_DATABASE.rice, date: twoDaysAgo },
+            { id: '2', item: 'Chicken', value: FOOD_DATABASE.chicken, date: yesterday },
+            { id: '3', item: 'Wheat', value: FOOD_DATABASE.wheat, date: yesterday },
+            { id: '4', item: 'Salmon', value: FOOD_DATABASE.salmon, date: today },
+            { id: '5', item: 'Broccoli', value: FOOD_DATABASE.broccoli, date: today },
+            { id: '6', item: 'Banana', value: FOOD_DATABASE.banana, date: today }
+          ],
+          water:    [{ id: '7', item: 'Bottle', value: 1000, date: yesterday }, { id: '8', item: 'Glass', value: 250, date: today }],
+          steps:    [{ id: '9', item: 'Walk', value: 5000, date: yesterday }, { id: '10', item: 'Run', value: 8000, date: today }],
+          sleep:    [{ id: '11', item: 'Night', value: 7, date: yesterday }],
+          workout:  [{ id: '12', item: 'Gym', value: 45, date: yesterday }],
+          weight:   [{ id: '13', item: 'Scale', value: 70, date: yesterday }, { id: '14', item: 'Scale', value: 69.5, date: today }]
+        };
+        
+        setAllData(fallbackData);
+        localStorage.setItem('fitSphereData', JSON.stringify(fallbackData));
+      }
+    };
